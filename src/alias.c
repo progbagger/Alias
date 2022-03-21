@@ -5,26 +5,22 @@
 // #define USUALLY "../database/usuallyDatabase.txt"
 
 int main() {
-
-    // list of all data files
-    const char *files[] = {
-        EASY,
-        PROGRAM,
-        USUALLY
-    };
-
-    // how many data files
+    const char *file_names[] = { EASY, PROGRAM, USUALLY };
     const int files_count = 3;
-
-    // how many words in all data files
-    int total_words_count = count_all_records(files, 3);
-
-    FILE *file = fopen(EASY, "r");
-    Record *record = read_record(file, 6);
-    printf("%s %s\n", record->eng_word, record->rus_word);
-    if (record)
-        free(record);
-    if (file)
+    Record *record = NULL;
+    for (int i = 0; i < files_count; i++) {
+        FILE *file = fopen(file_names[i], "r");
+        int words_count = count_records(file);
+        for (int i = 1; i <= words_count; i++) {
+            record = read_record(file, i);
+            printf("%s %s", record->eng_word, record->rus_word);
+            free(record);
+            if (i != words_count)
+                printf("\n");
+        }
         fclose(file);
+        if (i != files_count - 1)
+            printf("\n\n");
+    }
     return 0;
 }

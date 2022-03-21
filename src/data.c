@@ -19,7 +19,7 @@ Record *mem_record(FILE *file) {
     unsigned char *str = NULL, c = fgetc(file);
     int size = 0;
     Record *result = init_record();
-    while (!(c >= 160 && c <= 255)) {
+    while (c < 160) {
         unsigned char *tmp = str;
         str = realloc(tmp, (++size + 1) * sizeof(unsigned char));
         str[size - 1] = c;
@@ -49,8 +49,8 @@ Record *mem_record(FILE *file) {
 }
 
 // Counting records in one file
-int count_records(const char *file_path) {
-    FILE *file = fopen(file_path, "r");
+int count_records(FILE *file) {
+    fseek(file, 0, SEEK_SET);
     int result = 0;
     unsigned char c = fgetc(file);
     c = fgetc(file);
@@ -61,21 +61,23 @@ int count_records(const char *file_path) {
             c = fgetc(file);
         }
     }
-    if (file)
-        fclose(file);
     return result;
 }
 
 // Counting all the records in all .txt files
-int count_all_records(char **file_names, int files_count) {
+int count_all_records(const char **file_names, const int files_count) {
     int result = 0;
-    for (int i = 0; i < files_count; i++)
-        result += count_records(file_names[i]);
+    for (int i = 0; i < files_count; i++) {
+        FILE *file = fopen(file_names[i], "r");
+        result += count_records(file);
+        fclose(file);
+    }
     return result;
 }
 
 // Input one record from 
 Record *read_record(FILE *file, int pos) {
+    fseek(file, 0, SEEK_SET);
     Record *record = NULL;
     for (int i = 1; i < pos; i++)
         skip_record(file);
