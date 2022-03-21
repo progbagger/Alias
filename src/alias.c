@@ -7,14 +7,13 @@
 int main() {
     const char *file_names[] = { EASY, PROGRAM, USUALLY };
     const int files_count = 3;
-    Record *record = NULL;
     for (int i = 0; i < files_count; i++) {
         FILE *file = fopen(file_names[i], "r");
         int words_count = count_records(file);
         for (int i = 1; i <= words_count; i++) {
-            record = read_record(file, i);
+            Record *record = read_record(file, i);
             printf("%s %s", record->eng_word, record->rus_word);
-            free(record);
+            free_record(record);
             if (i != words_count)
                 printf("\n");
         }

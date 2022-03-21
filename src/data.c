@@ -8,6 +8,17 @@ Record *init_record() {
     return result;
 }
 
+// Cleaning allocated memory
+void free_record(Record *record) {
+    if (record) {
+        if (record->eng_word)
+            free(record->eng_word);
+        if (record->rus_word)
+            free(record->rus_word);
+        free(record);
+    }
+}
+
 // Reading records without memorising them
 void skip_record(FILE *file) {
     char str[100];
@@ -32,19 +43,19 @@ Record *mem_record(FILE *file) {
         str[size - 1] = '\0';
     }
     result->eng_word = str;
-    str = NULL;
     size = 0;
     fseek(file, -1, SEEK_CUR);
     c = fgetc(file);
+    unsigned char *sstr = NULL;
     while (c != '\n') {
-        unsigned char *tmp = str;
-        str = realloc(tmp, (++size + 1) * sizeof(char));
-        str[size - 1] = c;
+        unsigned char *tmp = sstr;
+        sstr = realloc(tmp, (++size + 1) * sizeof(char));
+        sstr[size - 1] = c;
         c = fgetc(file);
     }
-    if (str)
-        str[size] = '\0';
-    result->rus_word = str;
+    if (sstr)
+        sstr[size] = '\0';
+    result->rus_word = sstr;
     return result;
 }
 
