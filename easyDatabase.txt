@@ -1,0 +1,6 @@
+bag рюкзак
+ebook електронная книга
+table стол
+kitchen кухня
+house дом
+guitar гитара
