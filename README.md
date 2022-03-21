@@ -8,14 +8,6 @@ TODO list.
 - create database for 500 simple english words
 - create database for 500 more difficult english words
 
-example for database:
-
-«
-developer разработчик
-to invite приглашать
-bag рюкзак
-…
-eBook электронная книга
-»
+example for database will be in .txt files
 
 I want and I hope create first version our application next weekend.
