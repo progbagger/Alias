@@ -7,6 +7,7 @@ TODO list.
 - realize func timer for one minute which will break game
 - create database for 500 simple english words
 - create database for 500 more difficult english words
+- create database for 300 programm words
 
 example for database will be in .txt files
 
