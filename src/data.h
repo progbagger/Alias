@@ -1,13 +1,11 @@
 #ifndef SRC_DATA_H_
 #define SRC_DATA_H_
 
-#define EASY "../database/easyDatabase.txt"
-#define PROGRAM "../database/programDatabase.txt"
-#define USUALLY "../database/usuallyDatabase.txt"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "file_search.h"
 
 typedef struct record {
     unsigned char *eng_word, *rus_word;

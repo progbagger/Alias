@@ -1,10 +1,6 @@
 #include "data.h"
 #include "file_search.h"
 
-// * #define EASY "../database/easyDatabase.txt"
-// * #define PROGRAM "../database/programDatabase.txt"
-// * #define USUALLY "../database/usuallyDatabase.txt"
-
 int main() {
     const char folder[] = "../database/";
     create_tmp_file_with_txt(folder);  // creating file with list of .txt files
