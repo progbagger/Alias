@@ -3,7 +3,7 @@
 // Reading one stroke from file
 char *str_finput(FILE *file) {
     char *str = NULL, c;
-    int size = 0;
+    size_t size = 0;
     if (file) {
         c = fgetc(file);
         if (c != EOF) {
@@ -40,9 +40,9 @@ int is_file_txt(const char *file) {
 // Creating temporary file with list of all .txt files in "folder"
 void create_tmp_file_with_txt(const char *folder) {
     // Creating string with command and foolder path
-    const int tmp_size = strlen(TMP_FILE_WITH_TXT);
+    const size_t tmp_size = strlen(TMP_FILE_WITH_TXT);
     const char cmd_part_1[] = "ls --file-type ", cmd_part_3[] = " | grep .txt > ";
-    const int size_1 = strlen(cmd_part_1), size_2 = strlen(folder), size_3 = strlen(cmd_part_3);
+    const size_t size_1 = strlen(cmd_part_1), size_2 = strlen(folder), size_3 = strlen(cmd_part_3);
     char *command = calloc(size_1 + size_2 + size_3 + tmp_size + 1, sizeof(char));
     command = strcat(command, cmd_part_1);
     command = strcat(command, folder);
@@ -56,7 +56,7 @@ void create_tmp_file_with_txt(const char *folder) {
 // Removal of tmp file with .txt's
 void remove_tmp_file_with_txt() {
     const char cmd_1[] = "rm -rf ";
-    const int size_1 = strlen(cmd_1), size_2 = strlen(TMP_FILE_WITH_TXT);
+    const size_t size_1 = strlen(cmd_1), size_2 = strlen(TMP_FILE_WITH_TXT);
     char *command = calloc(size_1 + size_2 + 1, sizeof(char));
     command = strcat(command, cmd_1);
     command = strcat(command, TMP_FILE_WITH_TXT);
@@ -80,7 +80,7 @@ char *add_path_to_file(char *file, const char *folder) {
 char **read_tmp_file_with_txt(const char *folder) {
     FILE *file = fopen(TMP_FILE_WITH_TXT, "r");
     char **files = NULL;
-    int files_size = 0;
+    size_t files_size = 0;
     while (!feof(file)) {
         char *str = str_finput(file);
         if (str) {
@@ -108,8 +108,8 @@ char **read_tmp_file_with_txt(const char *folder) {
 }
 
 // Counting all .txt files in "folder"
-int count_txt_files() {
-    int result = 0;
+size_t count_txt_files() {
+    size_t result = 0;
     FILE *file = fopen(TMP_FILE_WITH_TXT, "r");
     char c;
     if (file) {

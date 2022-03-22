@@ -14,6 +14,6 @@ void create_tmp_file_with_txt(const char *folder);
 void remove_tmp_file_with_txt();
 char **read_tmp_file_with_txt(const char *folder);
 char *add_path_to_file(char *file, const char *folder);
-int count_txt_files();
+size_t count_txt_files();
 
 #endif  // SRC_FILE_SEARCH_H_
