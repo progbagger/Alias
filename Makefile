@@ -3,5 +3,5 @@ NAME=-o Alias
 
 all: build
 
-build: main.c main.h
-	gcc $(GCC_F) NAME
+build: main.c ./include/main.h
+	gcc $(GCC_F) main.c $(NAME)
