@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Werror -Wextra
 PTH = ../build/
 EXEC = Alias
-CFILES = data.c
+CFILES = data.c file_search.c
 MAIN = alias.c
 OBJECTS = $(CFILES:.c=.o)
 HEADERS = $(CFILES:.c=.h)
@@ -14,8 +14,8 @@ build: $(EXEC)
 $(EXEC): $(OBJECTS) $(MAIN)
 	$(CC) $(CFLAGS) $^ -o $(PTH)$(EXEC)
 
-$(OBJECTS): $(CFILES) $(HEADERS)
-	$(CC) $(CFLAGS) -c $<
+$(OBJECTS): $(CFILES)
+	$(CC) $(CFLAGS) -c $^
 
 clean:
 	rm -rf *.o *.gch
