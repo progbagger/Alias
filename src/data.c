@@ -8,43 +8,55 @@ Record *init_record() {
     return result;
 }
 
+// Cleaning allocated memory
+void free_record(Record *record) {
+    if (record) {  // ! in case of uninitialized record
+        if (record->eng_word)
+            free(record->eng_word);
+        if (record->rus_word)
+            free(record->rus_word);
+        free(record);
+    }
+}
+
 // Reading records without memorising them
 void skip_record(FILE *file) {
-    char str[100];
-    fgets(str, 100, file);
+    unsigned char c = fgetc(file);
+    while (c != '\n')
+        c = fgetc(file);
 }
 
 // Reading record into memory
 Record *mem_record(FILE *file) {
-    unsigned char *str = NULL, c = fgetc(file);
+    unsigned char *str1 = NULL, c = fgetc(file);
     int size = 0;
     Record *result = init_record();
     while (c < 160) {
-        unsigned char *tmp = str;
-        str = realloc(tmp, (++size + 1) * sizeof(unsigned char));
-        str[size - 1] = c;
+        unsigned char *tmp = str1;
+        str1 = realloc(tmp, (++size + 1) * sizeof(unsigned char));
+        str1[size - 1] = c;
         c = fgetc(file);
     }
-    if (str) {
+    if (str1) {  // ! Theoretically it is possible that str1 will be NULL
         // in case of unwilling space after last eng word
-        unsigned char *tmp = str;
-        str = realloc(tmp, size * sizeof(unsigned char));
-        str[size - 1] = '\0';
+        unsigned char *tmp = str1;
+        str1 = realloc(tmp, size * sizeof(unsigned char));
+        str1[size - 1] = '\0';
     }
-    result->eng_word = str;
-    str = NULL;
+    result->eng_word = str1;
     size = 0;
     fseek(file, -1, SEEK_CUR);
     c = fgetc(file);
+    unsigned char *str2 = NULL;
     while (c != '\n') {
-        unsigned char *tmp = str;
-        str = realloc(tmp, (++size + 1) * sizeof(char));
-        str[size - 1] = c;
+        unsigned char *tmp = str2;
+        str2 = realloc(tmp, (++size + 1) * sizeof(char));
+        str2[size - 1] = c;
         c = fgetc(file);
     }
-    if (str)
-        str[size] = '\0';
-    result->rus_word = str;
+    if (str2)  // ! Like str1^^
+        str2[size] = '\0';
+    result->rus_word = str2;
     return result;
 }
 
@@ -54,7 +66,7 @@ int count_records(FILE *file) {
     int result = 0;
     unsigned char c = fgetc(file);
     c = fgetc(file);
-    if (file) {
+    if (file) {  // ! In case if this file will not be opened
         while (!feof(file)) {
             if (c == '\n')
                 result++;
@@ -65,12 +77,14 @@ int count_records(FILE *file) {
 }
 
 // Counting all the records in all .txt files
-int count_all_records(const char **file_names, const int files_count) {
+int count_all_records(char **file_names, const int files_count) {
     int result = 0;
     for (int i = 0; i < files_count; i++) {
         FILE *file = fopen(file_names[i], "r");
-        result += count_records(file);
-        fclose(file);
+        if (file) {
+            result += count_records(file);
+            fclose(file);
+        }
     }
     return result;
 }
