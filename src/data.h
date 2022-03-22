@@ -15,8 +15,8 @@ Record *init_record();
 void free_record(Record *record);
 void skip_record(FILE *file);
 Record *mem_record(FILE *file);
-int count_records(FILE *file);
-int count_all_records(char **file_names, const int files_count);
-Record *read_record(FILE *file, int pos);
+size_t count_records(FILE *file);
+size_t count_all_records(char **file_names, const size_t files_count);
+Record *read_record(FILE *file, size_t pos);
 
 #endif  // SRC_DATA_H_

@@ -18,7 +18,7 @@ $(OBJECTS): $(CFILES)
 	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -rf *.o *.gch
+	rm -rf *.o *.gch $(CFILES:.c=.o);
 
 clean_exe:
 	rm -rf ../build/[!.gitkeep]*
