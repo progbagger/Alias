@@ -100,6 +100,7 @@ void destroy_game(Game *game) {
         }
         if (game->scores)
             free(game->scores);
+        free(game);
     }
 }
 
