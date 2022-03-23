@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra
 PTH = ../build/
-EXEC = Alias.exe
+EXEC = Alias
 CFILES = data.c file_search.c
 MAIN = alias.c
 OBJECTS = $(CFILES:.c=.o)
