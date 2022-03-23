@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -Werror -Wextra
 PTH = ../build/
 EXEC = Alias
-CFILES = data.c file_search.c
-MAIN = alias.c
+CFILES = data.c file_search.c alias.c randomizer.c
+MAIN = main.c
 OBJECTS = $(CFILES:.c=.o)
 HEADERS = $(CFILES:.c=.h)
 
