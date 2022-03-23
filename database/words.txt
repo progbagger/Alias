@@ -1151,12 +1151,6 @@ hot/hɔt/горячий
 narrow/'nærəu/узкий
 wide/waid/широкий
 alas/ə'læs/увы (TR!)
-Ginny
- 
-гинни (TR!)
-Hedwig
- 
-Хедвиг (TR!)
 shape/ʃeip/форма
 expressive/iks'presiv/выразительный
 skinny/'skini/худой, тощий, кожа да кости (!NEW!)
@@ -1401,9 +1395,6 @@ Eugene/ɜ:'ʒen/Юджин (TR!)
 Paul/pɔ:l/пол (!NEW!)
 peter/'pi:tər/питер (TR!)
 Ted/ti:d/раскидывать
-Nat
- 
-нат (TR!)
 noble/'nəub(ə)l/благородный, знатный
 either/'aiðə/или
 wise/waiz/мудрый

@@ -34,41 +34,33 @@ Record *mem_record(FILE *file) {
     unsigned char *str1 = NULL, c = fgetc(file);
     size_t size = 0;
     Record *result = init_record();
-    while (c != '/') {
+    while (c != '/' && !feof(file)) {
         unsigned char *tmp = str1;
         str1 = realloc(tmp, (++size + 1) * sizeof(unsigned char));
         str1[size - 1] = c;
         c = fgetc(file);
     }
-    if (str1) {  // ! Theoretically it is possible that str1 will be NULL
-        // in case of unwilling space after last eng word
-        unsigned char *tmp = str1;
-        str1 = realloc(tmp, size * sizeof(unsigned char));
-        str1[size - 1] = '\0';
-    }
+    if (str1)  // ! Theoretically it is possible that str1 will be NULL
+        str1[size] = '\0';
     result->eng_word = str1;
     size = 0;
     unsigned char *str2 = NULL;
     c = fgetc(file);
-    while (c != '/') {
+    while (c != '/' && !feof(file)) {
         unsigned char *tmp = str2;
         str2 = realloc(tmp, (++size + 1) * sizeof(unsigned char));
         str2[size - 1] = c;
         c = fgetc(file);
     }
-    if (str2) {  // ! Theoretically it is possible that str1 will be NULL
-        // in case of unwilling space after last eng word
-        unsigned char *tmp = str2;
-        str2 = realloc(tmp, size * sizeof(unsigned char));
-        str2[size - 1] = '\0';
-    }
+    if (str2)  // ! Theoretically it is possible that str2 will be NULL
+        str2[size] = '\0';
     result->transcription = str2;
     size = 0;
     unsigned char *str3 = NULL;
     c = fgetc(file);
-    while (c != '\n') {
+    while (c != '\n' && !feof(file)) {
         unsigned char *tmp = str3;
-        str3 = realloc(tmp, (++size + 1) * sizeof(char));
+        str3 = realloc(tmp, (++size + 1) * sizeof(unsigned char));
         str3[size - 1] = c;
         c = fgetc(file);
     }
@@ -91,6 +83,7 @@ size_t count_records(FILE *file) {
             c = fgetc(file);
         }
     }
+    fseek(file, 0, SEEK_SET);
     return result;
 }
 
@@ -132,8 +125,8 @@ void show_files_contents(const char *folder) {
         const size_t record_count = count_records(file);
         printf("----IN FILE %s - %lu RECORDS----\n", files[i], record_count);
         for (size_t j = 1; j <= record_count; j++) {
-            Record *record = read_record(file, j);
-            printf("%s [ %s ] - %s", record->eng_word, record->transcription, record->rus_word);
+            Record *record = mem_record(file);
+            printf("%lu: %s [ %s ] - %s", j, record->eng_word, record->transcription, record->rus_word);
             free_record(record);
             if (j != record_count)
                 printf("\n");

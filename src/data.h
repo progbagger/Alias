@@ -8,7 +8,10 @@
 #include "file_search.h"
 
 typedef struct record {
-    unsigned char *eng_word, *transcription, *rus_word;
+    unsigned char
+        *eng_word,
+        *transcription,
+        *rus_word;
 } Record;
 
 Record *init_record();
