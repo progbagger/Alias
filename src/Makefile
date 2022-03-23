@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra
 PTH = ../build/
-EXEC = Alias
+EXEC = Alias.exe
 CFILES = data.c file_search.c
 MAIN = alias.c
 OBJECTS = $(CFILES:.c=.o)
@@ -18,7 +18,7 @@ $(OBJECTS): $(CFILES)
 	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -rf *.o *.gch $(CFILES:.c=.o);
+	rm -rf $(CFILES:.c=.o) $(CFILES:.c=.gch) $(CFILES:.c=.a)
 
 clean_exe:
 	rm -rf ../build/[!.gitkeep]*
