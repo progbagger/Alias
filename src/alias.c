@@ -18,6 +18,12 @@ char *str_input() {
 // Function to output rules and hello message
 void print_rules() {
     system("clear");  // ! WORKS ONLY IN UNIX-LIKE TERMINALS
+    printf("Welcome to the Alias game!\n\n");
+    printf("In this game you will try to describe given words with without calling this word\n");
+    printf("to your team. There can be up to 5 teams. Each player will try to describe\n");
+    printf("given words only one time per round. Then commands can continue to play\n");
+    printf("or finish the game and declare a winner.\n\n");
+    printf("To start the game input number of teams from 2 to 5:\n");
 }
 
 // Function to input CORRECT teams count

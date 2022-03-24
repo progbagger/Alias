@@ -6,9 +6,10 @@
 #include <string.h>
 
 #include "data.h"
+#include "file_search.h"
 
-#define N 30
-#define M 106
+#define N 30  // Vertical size of the window
+#define M 106  // Horizontal size of the window
 
 #define GAME_NAME "Alias!"
 
