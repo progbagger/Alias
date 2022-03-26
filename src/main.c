@@ -2,6 +2,7 @@
 #include "file_search.h"
 #include "randomizer.h"
 #include "alias.h"
+#include "defines.h"
 
 /*
     TODO: Function to sort and clarify contents
@@ -16,9 +17,10 @@
 
 int main() {
     // const char folder[] = "../database/";
+    const char file_path[] = "../database/words.txt";
     // show_files_contents(folder);  // * debug functon
     print_rules();
-    Game *game = init_game();
+    Game *game = init_game(file_path);
     start_game(game);
     print_game(game);
     destroy_game(game);

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "defines.h"
+
 void set_up_random();
 size_t random_record(const size_t h);
 

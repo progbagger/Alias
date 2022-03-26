@@ -5,26 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "defines.h"
+
 #include "data.h"
 #include "file_search.h"
 #include "randomizer.h"
-
-#define N 30  // Vertical size of the window
-#define M 106  // Horizontal size of the window
-
-#define GAME_NAME "Alias!"
-
-#define FILE_PATH "../database/words.txt"
-
-/*
-    * Next strings need to be uncommented
-    * depended on OS on which this program
-    * compiles
-*/
-
-#define CLR_COMMAND "clear"  // ! UNIX-LIKE OS
-
-// #define CLR_COMMAND "cls"    // ! WINDOWS
 
 typedef struct {
     char **teams;
@@ -56,11 +41,19 @@ char ***input_players(char **teams_, size_t *players_counts, const size_t n);
     during the game
 */
 
-Game *init_game();
+Game *init_game(const char *file_path);
 void start_game(Game *game);
+void next_word(Game *game);
 void next_round(Game *game);
 void end_game(Game *game);
 void destroy_game(Game *game);
+
+/*
+    * Main function of the game
+    * which rules everything
+*/
+
+void game_round(Game *game);
 
 /*
     Functions to output game window

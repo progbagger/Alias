@@ -121,7 +121,7 @@ char ***input_players(char **teams_, size_t *players_counts, const size_t n) {
 }
 
 // Create game
-Game *init_game() {
+Game *init_game(const char *file_path) {
     const size_t t_count = input_teams_count();
     char **teams = input_teams(t_count);
     size_t *players_counters = init_players_counters(t_count);
@@ -139,7 +139,7 @@ Game *init_game() {
     for (size_t i = 0; i < game->teams_count; i++)
         game->players_status[i] = calloc(game->players_count[i], sizeof(short int));
     game->round = 1;
-    game->words_file = fopen(FILE_PATH, "r");
+    game->words_file = fopen(file_path, "r");
     if (!game->words_file) {
         printf("[ERROR] File couldn\'t opened for reading. Exiting.\n");
         destroy_game(game);
@@ -197,6 +197,8 @@ void destroy_game(Game *game) {
             free(game->scores);
         if (game->players_count)
             free(game->players_count);
+        if (game->words_file)
+            fclose(game->words_file);
         free(game);
     }
 }
@@ -213,23 +215,30 @@ void start_game(Game *game) {
 
 /*
     Function to handle next turn to next player
-    and to switch words
 */
 void next_round(Game *game) {
     if (game->game_status) {
         size_t current_player_i = 0, current_player_j = 0;
+        size_t max_p_count = game->players_count[0];
+        for (size_t i = 1; i < game->teams_count; i++)
+            if (game->players_count[i] > max_p_count)
+                max_p_count = game->players_count[i];
         short int check = 0;
-        for (; current_player_i < game->teams_count; current_player_i++) {
-            for (; current_player_j < game->players_count[current_player_i]; current_player_j++) {
-                if (check) {
-                    game->players_status[current_player_i][current_player_j] = 1;
-                    current_player_i = game->teams_count;
-                    check = 0;
-                    break;
-                }
-                if (game->players_status[current_player_i][current_player_j]) {
-                    check = 1;
-                    game->players_status[current_player_i][current_player_j] = 0;
+        for (; current_player_j < max_p_count; current_player_j++) {
+            for (; current_player_i < game->teams_count; current_player_i++) {
+                if (current_player_j == game->players_count[current_player_i]) {
+                    continue;
+                } else {
+                    if (check) {
+                        check = 0;
+                        game->players_status[current_player_i][current_player_j] = 1;
+                        current_player_j = max_p_count;
+                        break;
+                    }
+                    if (game->players_status[current_player_i][current_player_j]) {
+                        check = 1;
+                        game->players_status[current_player_i][current_player_j] = 0;
+                    }
                 }
             }
         }
@@ -240,6 +249,11 @@ void next_round(Game *game) {
         printf("[ERROR] Game isn\'t started yet. Something went wrong.\n");
     }
 }
+
+// // Function which changes words
+// void next_word(Game *game) {
+
+// }
 
 // Printing left part of game window
 void print_teams(
