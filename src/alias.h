@@ -7,11 +7,24 @@
 
 #include "data.h"
 #include "file_search.h"
+#include "randomizer.h"
 
 #define N 30  // Vertical size of the window
 #define M 106  // Horizontal size of the window
 
 #define GAME_NAME "Alias!"
+
+#define FILE_PATH "../database/words.txt"
+
+/*
+    * Next strings need to be uncommented
+    * depended on OS on which this program
+    * compiles
+*/
+
+#define CLR_COMMAND "clear"  // ! UNIX-LIKE OS
+
+// #define CLR_COMMAND "cls"    // ! WINDOWS
 
 typedef struct {
     char **teams;
@@ -21,10 +34,16 @@ typedef struct {
     size_t *scores;
     Record **current_words;
     size_t current_words_count;
-    size_t status;
+    size_t game_status;
+    short int **players_status;
+    size_t round;
+    FILE *words_file;
 } Game;
 
-void print_rules();
+/*
+    Functions to correctly input teams names and
+    players names
+*/
 
 char *str_input();
 size_t input_teams_count();
@@ -32,12 +51,32 @@ char **input_teams(const size_t n);
 size_t *init_players_counters(const size_t n);
 char ***input_players(char **teams_, size_t *players_counts, const size_t n);
 
-Game *init_game(char **teams_, size_t t_count, char ***players_, size_t *p_count);
+/*
+    Functions to manage game's settings
+    during the game
+*/
+
+Game *init_game();
+void start_game(Game *game);
+void next_round(Game *game);
 void end_game(Game *game);
 void destroy_game(Game *game);
 
-void start_game(Game *game);
+/*
+    Functions to output game window
+    with all necessary information
+    into terminal
+*/
 
+void print_rules();
+void print_teams(
+    Game *game,
+    const size_t row,
+    const size_t uni,
+    size_t *c_team,
+    size_t *c_player
+);
+void print_words(Game *game, const size_t row);
 void print_game(Game *game);
 
 #endif  // SRC_ALIAS_H_

@@ -41,14 +41,12 @@ int is_file_txt(const char *file) {
 void create_tmp_file_with_txt(const char *folder) {
     // Creating string with command and foolder path
     const size_t tmp_size = strlen(TMP_FILE_WITH_TXT);
-    const char cmd_part_1[] = "ls ", cmd_part_3[] = " | grep .txt > ";
-    const size_t size_1 = strlen(cmd_part_1), size_2 = strlen(folder), size_3 = strlen(cmd_part_3);
+    const size_t size_1 = strlen(CMD1), size_2 = strlen(folder), size_3 = strlen(CMD2);
     char *command = calloc(size_1 + size_2 + size_3 + tmp_size + 1, sizeof(char));
-    command = strcat(command, cmd_part_1);
+    command = strcat(command, CMD1);
     command = strcat(command, folder);
-    command = strcat(command, cmd_part_3);
+    command = strcat(command, CMD2);
     command = strcat(command, TMP_FILE_WITH_TXT);
-    // ! THIS WORKS ONLY ON UNIX-OS DEVICES
     system(command);
     free(command);
 }

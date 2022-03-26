@@ -7,6 +7,18 @@
 
 #define TMP_FILE_WITH_TXT "data_files_names"
 
+/*
+    * Next strings need to be uncommented
+    * depended on OS on which this program
+    * compiles
+*/
+
+#define CMD1 "ls "                     // ! WORKS ONLY IN
+#define CMD2 " | grep .txt > "         // ! UNIX-LIKE SYSTEMS
+
+// #define CMD1 "dir /b "                 // ! WORKS ONLY IN
+// #define CMD2 " | findstr \".txt\" > "  // ! WINDOWS
+
 char *str_finput(FILE *file);
 int is_file_txt(const char *file);
 

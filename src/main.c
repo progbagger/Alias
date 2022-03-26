@@ -18,11 +18,8 @@ int main() {
     // const char folder[] = "../database/";
     // show_files_contents(folder);  // * debug functon
     print_rules();
-    const size_t teams_count = input_teams_count();
-    char **teams = input_teams(teams_count);
-    size_t *players_counters = init_players_counters(teams_count);
-    char ***players = input_players(teams, players_counters, teams_count);
-    Game *game = init_game(teams, teams_count, players, players_counters);
+    Game *game = init_game();
+    start_game(game);
     print_game(game);
     destroy_game(game);
     return 0;

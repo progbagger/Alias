@@ -17,7 +17,7 @@ char *str_input() {
 
 // Function to output rules and hello message
 void print_rules() {
-    system("clear");  // ! WORKS ONLY IN UNIX-LIKE TERMINALS
+    system(CLR_COMMAND);
     printf("Welcome to the Alias game!\n\n");
     printf("In this game you will try to describe given words with without calling this word\n");
     printf("to your team. There can be up to 5 teams. Each player will try to describe\n");
@@ -31,11 +31,11 @@ size_t input_teams_count() {
     int result = 0;
     int err_no = scanf("%d", &result);
     while (getchar() != '\n') {}
-    if (!err_no || result < 2 || result > 5) {
-        while (!err_no || result < 2 || result > 5) {
+    if (!err_no || result < 2 || result > 4) {
+        while (!err_no || result < 2 || result > 4) {
             if (!err_no) {
                 printf("It is not a number or a suitable number. Please, try again.\n");
-            } else if (result < 2 || result > 5) {
+            } else if (result < 2 || result > 4) {
                 printf("%d teams can\'t play this game. Please, enter another number.\n", result);
             } else {
                 printf("Unknown error. Please, try again.\n");
@@ -121,22 +121,40 @@ char ***input_players(char **teams_, size_t *players_counts, const size_t n) {
 }
 
 // Create game
-Game *init_game(char **teams_, size_t t_count, char ***players_, size_t *p_count) {
+Game *init_game() {
+    const size_t t_count = input_teams_count();
+    char **teams = input_teams(t_count);
+    size_t *players_counters = init_players_counters(t_count);
+    char ***players = input_players(teams, players_counters, t_count);
     Game *game = malloc(sizeof(Game));
-    game->teams = teams_;
+    game->teams = teams;
     game->teams_count = t_count;
     game->scores = calloc(game->teams_count, sizeof(size_t));
     game->current_words = NULL;
     game->current_words_count = 0;
-    game->status = 0;
-    game->players = players_;
-    game->players_count = p_count;
+    game->game_status = 0;
+    game->players = players;
+    game->players_count = players_counters;
+    game->players_status = calloc(game->teams_count, sizeof(short int*));
+    for (size_t i = 0; i < game->teams_count; i++)
+        game->players_status[i] = calloc(game->players_count[i], sizeof(short int));
+    game->round = 1;
+    game->words_file = fopen(FILE_PATH, "r");
+    if (!game->words_file) {
+        printf("[ERROR] File couldn\'t opened for reading. Exiting.\n");
+        destroy_game(game);
+        game = NULL;
+    }
     return game;
 }
 
 // End game in case if teams wants to play again
 void end_game(Game *game) {
-    game->status = 0;
+    game->game_status = 0;
+    for (size_t i = 0; i < game->teams_count; i++)
+        for (size_t j = 0; j < game->players_count[i]; j++)
+            if (game->players_status[i][j])
+                game->players_status[i][j] = 0;
 }
 
 // Destroy game
@@ -168,6 +186,13 @@ void destroy_game(Game *game) {
             }
             free(game->players);
         }
+        if (game->players_status) {
+            for (size_t i = 0; i < game->teams_count; i++) {
+                if (game->players_status[i])
+                    free(game->players_status[i]);
+            }
+            free(game->players_status);
+        }
         if (game->scores)
             free(game->scores);
         if (game->players_count)
@@ -181,7 +206,84 @@ void destroy_game(Game *game) {
     starts the game :)
 */
 void start_game(Game *game) {
-    game->status = 1;
+    game->game_status = 1;
+    game->players_status[0][0] = 1;
+    set_up_random();
+}
+
+/*
+    Function to handle next turn to next player
+    and to switch words
+*/
+void next_round(Game *game) {
+    if (game->game_status) {
+        size_t current_player_i = 0, current_player_j = 0;
+        short int check = 0;
+        for (; current_player_i < game->teams_count; current_player_i++) {
+            for (; current_player_j < game->players_count[current_player_i]; current_player_j++) {
+                if (check) {
+                    game->players_status[current_player_i][current_player_j] = 1;
+                    current_player_i = game->teams_count;
+                    check = 0;
+                    break;
+                }
+                if (game->players_status[current_player_i][current_player_j]) {
+                    check = 1;
+                    game->players_status[current_player_i][current_player_j] = 0;
+                }
+            }
+        }
+        if (check) {
+            game->players_status[0][0] = 1;
+        }
+    } else {
+        printf("[ERROR] Game isn\'t started yet. Something went wrong.\n");
+    }
+}
+
+// Printing left part of game window
+void print_teams(
+    Game *game,
+    const size_t row,
+    const size_t uni,
+    size_t *c_team,
+    size_t *c_player
+) {
+    const char d_teams[] = "Teams:", d_scores[] = "Scores:";
+    printf("* ");
+    if (row == 1) {
+        printf("%-20s %-7s", d_teams, d_scores);
+    } else if (row - 2 < uni) {
+        if (!(*c_player)) {
+            printf("%-20s %-7lu", game->teams[*c_team], game->scores[*c_team]);
+            (*c_player)++;
+            if (*c_team != game->teams_count)
+                (*c_team)++;
+        } else {
+            if (game->players_status[(*c_team) - 1][(*c_player) - 1])
+                printf("> ");
+            else
+                printf("  ");
+            printf("%-26s", game->players[(*c_team) - 1][(*c_player) - 1]);
+            if ((*c_player) != game->players_count[(*c_team) - 1])
+                (*c_player)++;
+            else
+                (*c_player) = 0;
+        }
+    } else {
+        for (size_t i = 0; i < 28; i++)
+            printf(" ");
+    }
+}
+
+// Printing right part of game window
+void print_words(Game *game, const size_t row) {
+    if (row) {
+        for (size_t i = 0; i < M - 30 - 2; i++)
+            printf(" ");
+        printf(" *");
+    }
+    game->game_status = 1;
 }
 
 // Printing game's info in terminal
@@ -190,92 +292,21 @@ void print_game(Game *game) {
     for (size_t i = 0; i < game->teams_count; i++) {
         uni_counter += game->players_count[i];
     }
-    const char disp_teams_label[] = "Teams:", disp_score[] = "Score:";
-    system("clear");  // ! WORKS ONLY IN UNIX-LIKE TERMINALS
-    for (size_t i = 0; i < N; i++) {
-        if (i == 0) {
-            for (size_t j = 0; j < M / 2 - strlen(GAME_NAME) / 2; j++) {
-                printf("*");
-            }
-            printf("%s", GAME_NAME);
-            for (size_t j = 0; j < M / 2 - strlen(GAME_NAME) / 2 - 1; j++) {
-                printf("*");
-            }
-        } else if (i == N - 1) {
-            for (size_t j = 0; j < M - 1; j++) {
-                printf("*");
-            }
-        } else if (i == 1) {
-            printf("* %-20s %-20s", disp_teams_label, disp_score);
-            for (size_t j = 0; j < M - strlen(GAME_NAME) - 31; j++) {
-                printf(" ");
-            }
-            printf("*");
-        } else if (i >= 2 && i < uni_counter) {
-            size_t team_counter = 0;
-            printf("* %-20s %-3lu", game->teams[team_counter], game->scores[team_counter]);
-            team_counter++;
-            i++;
-            for (size_t j = 23; j < M - 1; j++)
-                printf(" ");
-            printf("*\n");
-        } else {
-            printf("*");
-            for (size_t j = 0; j < M - 1 - 2; j++) {
-                printf(" ");
-            }
-            printf("*");
-        }
+    // const char disp_teams_label[] = "Teams:", disp_score[] = "Score:";
+    start_game(game);
+    system(CLR_COMMAND);
+    for (size_t i = 0; i < M / 2 - strlen(GAME_NAME) / 2; i++)
+        printf("*");
+    printf(GAME_NAME);
+    for (size_t i = 0; i < M / 2 - strlen(GAME_NAME) / 2; i++)
+        printf("*");
+    printf("\n");
+    size_t c_team = 0, c_player = 0;
+    for (size_t i = 1; i < N - 1; i++) {
+        print_teams(game, i, uni_counter, &c_team, &c_player);
+        print_words(game, i);
         printf("\n");
     }
-    start_game(game);
-    // for (size_t n = 0; n < N; n++) {
-    //     for (size_t m = 0; m < M; m++) {
-    //         if (n == 0) {
-    //             if (m >= M / 2 - strlen(GAME_NAME) / 2 && m <= M / 2 + strlen(GAME_NAME) / 2 - 1) {
-    //                 if (m == M / 2 - strlen(GAME_NAME) / 2)
-    //                     printf(GAME_NAME);
-    //             } else {
-    //                 printf("*");
-    //             }
-    //         } else if (n == N - 1) {
-    //             printf("*");
-    //         } else if (m == 0 || m == M - 1) {
-    //             printf("*");
-    //         } else if (n == 2 && m >= M / 2 - strlen(disp_teams_label) / 2 && m < M / 2 + strlen(disp_teams_label) / 2) {
-    //             if (m == M / 2 - strlen(disp_teams_label) / 2) {
-    //                 printf("%s", disp_teams_label);
-    //             }
-    //         } else if (n == 3) {
-    //             if (m == 1) {
-    //                 printf(" ");
-    //             } else if (m == 2) {
-    //                 for (size_t i = 0; i < game->teams_count; i++) {
-    //                     printf("%-20s", game->teams[i]);
-    //                 }
-    //                 for (size_t i = 0; i < 5 - game->teams_count; i++) {
-    //                     for (size_t j = 1; j <= 20; j++)
-    //                         printf(" ");
-    //                 }
-    //                 printf("   ");
-    //             }
-    //         } else if (n == 4) {
-    //             if (m == 1) {
-    //                 printf(" ");
-    //             } else if (m == 2) {
-    //                 for (size_t i = 0; i < game->teams_count; i++) {
-    //                     printf("%-20lu", game->scores[i]);
-    //                 }
-    //                 for (size_t i = 0; i < 5 - game->teams_count; i++) {
-    //                     for (size_t j = 1; j <= 20; j++)
-    //                         printf(" ");
-    //                 }
-    //                 printf("   ");
-    //             }
-    //         } else
-    //             printf(" ");
-    //     }
-    //     if (n != N - 1)
-    //         printf("\n");
-    // }
+    for (size_t i = 0; i < M; i++)
+        printf("*");
 }
