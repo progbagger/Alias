@@ -168,7 +168,7 @@ Game *init_game(const char *file_path) {
     game->round = 1;
     game->words_file = fopen(file_path, "r");
     game->record_count = count_records(game->words_file);
-    game->timer = clock();
+    game->timer = 0.0;
     if (!game->words_file) {
         printf("[ERROR] File couldn\'t opened for reading. Exiting.\n");
         destroy_game(game);
@@ -180,10 +180,7 @@ Game *init_game(const char *file_path) {
 // End game in case if teams wants to play again
 void end_game(Game *game) {
     game->game_status = 0;
-    for (size_t i = 0; i < game->teams_count; i++)
-        for (size_t j = 0; j < game->players_count[i]; j++)
-            if (game->players_status[i][j])
-                game->players_status[i][j] = 0;
+    game->timer = 0.0;
 }
 
 // Destroy game
@@ -239,6 +236,8 @@ void destroy_game(Game *game) {
 void start_game(Game *game) {
     game->game_status = 1;
     game->players_status[0][0] = 1;
+    game->timer = ROUND_TIME;
+    empty_words(game);
     set_up_random();
 }
 
@@ -246,37 +245,35 @@ void start_game(Game *game) {
     Function to handle next turn to next player
 */
 void next_round(Game *game) {
-    if (game->game_status) {
-        size_t current_player_i = 0, current_player_j = 0;
-        size_t max_p_count = game->players_count[0];
-        for (size_t i = 1; i < game->teams_count; i++)
-            if (game->players_count[i] > max_p_count)
-                max_p_count = game->players_count[i];
-        short int check = 0;
-        for (; current_player_j < max_p_count; current_player_j++) {
-            for (; current_player_i < game->teams_count; current_player_i++) {
-                if (current_player_j == game->players_count[current_player_i]) {
-                    continue;
-                } else {
-                    if (check) {
-                        check = 0;
-                        game->players_status[current_player_i][current_player_j] = 1;
-                        current_player_j = max_p_count;
-                        break;
-                    }
-                    if (game->players_status[current_player_i][current_player_j]) {
-                        check = 1;
-                        game->players_status[current_player_i][current_player_j] = 0;
-                    }
-                }
+    game->timer = ROUND_TIME;
+    size_t i = 0, j = 0;
+    size_t max_p_count = game->players_count[0];
+    for (size_t k = 1; k < game->teams_count; k++)
+        if (game->players_count[k] > max_p_count)
+            max_p_count = game->players_count[k];
+    short int check = 0;
+    for (; j < max_p_count; j++) {
+        for (; i < game->teams_count; i++) {
+            if (j >= game->players_count[i])
+                continue;
+            if (game->players_status[i][j]) {
+                check = 1;
+                game->players_status[i][j] = 0;
+                continue;
+            }
+            if (check) {
+                check = 0;
+                j = max_p_count;
+                game->players_status[i][j] = 1;
+                break;
             }
         }
-        if (check) {
-            game->players_status[0][0] = 1;
-        }
-    } else {
-        printf("[ERROR] Game isn\'t started yet. Something went wrong.\n");
+        i = 0;
     }
+    if (check)
+        game->players_status[0][0] = 1;
+    for (size_t k = 0; k < game->teams_count; k++)
+        game->scores[k] += 100;
 }
 
 // Function to clear words queue
@@ -353,10 +350,13 @@ void print_teams(
 
 // Printing right part of game window
 void print_words(Game *game, const size_t row) {
-    const char words[] = "Words:";
+    const char words[] = "Words:", timer[] = "Time:";
+    size_t shift = 0;
+    if (game->current_words_count > N - 3)
+        shift += (game->current_words_count - (N - 3));
     if (row == 1) {
-        printf("    %s", words);
-        for (int i = 0; i < (int) (M - 2 - strlen(words) - 4 - 30); i++)
+        printf("    %s    %s %-4.1lf", words, timer, game->timer);
+        for (int i = 0; i < (int) (M - 2 - strlen(words) - strlen(timer) - 5 - 4 - 4 - 30); i++)
             printf(" ");
     } else if (row - 2 < game->current_words_count) {
         printf("  ");
@@ -366,14 +366,14 @@ void print_words(Game *game, const size_t row) {
             printf("  ");
         printf(
             "%s [ %s ] - %s",
-            game->current_words[row - 2]->eng_word,
-            game->current_words[row - 2]->transcription,
-            game->current_words[row - 2]->rus_word
+            game->current_words[row - 2 + shift]->eng_word,
+            game->current_words[row - 2 + shift]->transcription,
+            game->current_words[row - 2 + shift]->rus_word
         );
         for (int i = 0; i < (int) (M - 2 - 8 - 4 - 30 -
-            u_strlen(game->current_words[row - 2]->eng_word) -
-            u_strlen(game->current_words[row - 2]->transcription) -
-            u_strlen(game->current_words[row - 2]->rus_word));
+            u_strlen(game->current_words[row - 2 + shift]->eng_word) -
+            u_strlen(game->current_words[row - 2 + shift]->transcription) -
+            u_strlen(game->current_words[row - 2 + shift]->rus_word));
             i++
         ) {
             printf(" ");
@@ -392,7 +392,6 @@ void print_game(Game *game) {
         uni_counter += game->players_count[i];
     }
     // const char disp_teams_label[] = "Teams:", disp_score[] = "Score:";
-    start_game(game);
     system(CLR_COMMAND);
     for (size_t i = 0; i < M / 2 - strlen(GAME_NAME) / 2; i++)
         printf("*");
@@ -408,4 +407,28 @@ void print_game(Game *game) {
     }
     for (size_t i = 0; i < M; i++)
         printf("*");
+    printf("\n");
+}
+
+// Function to handle game round
+void game_round(Game *game) {
+    start_game(game);
+    double diff = 0.0;
+    while (game->game_status) {
+        if (game->timer < 0)
+            end_game(game);
+        if (game->game_status) {
+            if (diff == 1.0) {
+                next_word(game);
+                diff = 0.0;
+            }
+            print_game(game);
+            game->timer -= STEP;
+            diff += STEP;
+            usleep((useconds_t) SLEEP_TIME);
+        } else {
+            print_game(game);
+            break;
+        }
+    }
 }

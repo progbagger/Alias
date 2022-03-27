@@ -21,32 +21,10 @@ int main() {
     // show_files_contents(folder);  // * debug functon
     print_rules();
     Game *game = init_game(file_path);
-    start_game(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    next_word(game);
-    print_game(game);
+    for (size_t i = 0; i < 4; i++) {
+        game_round(game);
+        next_round(game);
+    }
     destroy_game(game);
     return 0;
 }

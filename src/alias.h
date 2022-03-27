@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "defines.h"
 
@@ -25,7 +26,7 @@ typedef struct {
     size_t round;
     FILE *words_file;
     size_t record_count;
-    clock_t timer;
+    double timer;
 } Game;
 
 /*

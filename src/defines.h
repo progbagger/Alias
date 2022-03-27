@@ -13,6 +13,10 @@
 
 #define FILE_PATH "../database/words.txt"
 
+#define SLEEP_TIME 200000
+#define STEP (double) SLEEP_TIME / (double) 1000000
+#define ROUND_TIME 5.0
+
 // * file_search.h
 
 #define TMP_FILE_WITH_TXT "data_files_names"
