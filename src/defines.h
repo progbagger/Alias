@@ -4,7 +4,7 @@
 // * alias.h
 
 #define N 30  // Vertical size of the window
-#define M 106  // Horizontal size of the window
+#define M 120  // Horizontal size of the window
 
 #define GAME_NAME "Alias!"
 

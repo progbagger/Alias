@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "defines.h"
 
@@ -23,6 +24,8 @@ typedef struct {
     short int **players_status;
     size_t round;
     FILE *words_file;
+    size_t record_count;
+    clock_t timer;
 } Game;
 
 /*
@@ -31,6 +34,8 @@ typedef struct {
 */
 
 char *str_input();
+size_t u_strlen(const unsigned char *str);
+unsigned char *u_strcpy(unsigned char *dest, const unsigned char *str);
 size_t input_teams_count();
 char **input_teams(const size_t n);
 size_t *init_players_counters(const size_t n);
@@ -44,6 +49,7 @@ char ***input_players(char **teams_, size_t *players_counts, const size_t n);
 Game *init_game(const char *file_path);
 void start_game(Game *game);
 void next_word(Game *game);
+void empty_words(Game *game);
 void next_round(Game *game);
 void end_game(Game *game);
 void destroy_game(Game *game);

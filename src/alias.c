@@ -15,6 +15,33 @@ char *str_input() {
     return str;
 }
 
+// strlen for unsigned char
+size_t u_strlen(const unsigned char *str) {
+    size_t result = 0, check = 0;
+    for (size_t i = 0; str[i] != '\0'; i++) {
+        if (check) {
+            check = 0;
+            result++;
+            continue;
+        }
+        if (str[i] > 127) {
+            check = 1;
+            continue;
+        }
+        result++;
+    }
+    return result;
+}
+
+// strcpy for unsigned char
+unsigned char *u_strcpy(unsigned char *dest, const unsigned char *str) {
+    size_t i = 0;
+    for (; str[i] != '\0'; i++)
+        dest[i] = str[i];
+    dest[i] = '\0';
+    return dest;
+}
+
 // Function to output rules and hello message
 void print_rules() {
     system(CLR_COMMAND);
@@ -140,6 +167,8 @@ Game *init_game(const char *file_path) {
         game->players_status[i] = calloc(game->players_count[i], sizeof(short int));
     game->round = 1;
     game->words_file = fopen(file_path, "r");
+    game->record_count = count_records(game->words_file);
+    game->timer = clock();
     if (!game->words_file) {
         printf("[ERROR] File couldn\'t opened for reading. Exiting.\n");
         destroy_game(game);
@@ -250,10 +279,42 @@ void next_round(Game *game) {
     }
 }
 
-// // Function which changes words
-// void next_word(Game *game) {
+// Function to clear words queue
+void empty_words(Game *game) {
+    if (game->current_words) {
+        for (size_t i = 0; i < game->current_words_count; i++)
+            if (game->current_words[i])
+                free_record(game->current_words[i]);
+        free(game->current_words);
+        game->current_words = NULL;
+    }
+    game->current_words_count = 0;
+}
 
-// }
+// Function which changes words
+void next_word(Game *game) {
+    Record **tmp = calloc(++(game->current_words_count), sizeof(Record*));
+    /*
+        ! Russian words and english transcription has more
+        ! symbols in it and u_strlen returns shrinked amount
+        ! of symbols so it is necessary to allocate safe amount
+        ! of memory for these words
+    */
+    for (size_t i = 0; i < game->current_words_count - 1; i++) {
+        tmp[i] = init_record();
+        tmp[i]->eng_word = calloc(u_strlen(game->current_words[i]->eng_word) + 1, sizeof(unsigned char));
+        tmp[i]->eng_word = u_strcpy(tmp[i]->eng_word, game->current_words[i]->eng_word);
+        tmp[i]->transcription = calloc(u_strlen(game->current_words[i]->transcription) * 2 + 1, sizeof(unsigned char));
+        tmp[i]->transcription = u_strcpy(tmp[i]->transcription, game->current_words[i]->transcription);
+        tmp[i]->rus_word = calloc(u_strlen(game->current_words[i]->rus_word) * 2 + 1, sizeof(unsigned char));
+        tmp[i]->rus_word = u_strcpy(tmp[i]->rus_word, game->current_words[i]->rus_word);
+        free_record(game->current_words[i]);
+    }
+    if (game->current_words)
+        free(game->current_words);
+    game->current_words = tmp;
+    game->current_words[game->current_words_count - 1] = read_record(game->words_file, random_record(game->record_count));
+}
 
 // Printing left part of game window
 void print_teams(
@@ -292,12 +353,36 @@ void print_teams(
 
 // Printing right part of game window
 void print_words(Game *game, const size_t row) {
-    if (row) {
-        for (size_t i = 0; i < M - 30 - 2; i++)
+    const char words[] = "Words:";
+    if (row == 1) {
+        printf("    %s", words);
+        for (int i = 0; i < (int) (M - 2 - strlen(words) - 4 - 30); i++)
             printf(" ");
-        printf(" *");
+    } else if (row - 2 < game->current_words_count) {
+        printf("  ");
+        if (row - 2 == game->current_words_count - 1)
+            printf("> ");
+        else
+            printf("  ");
+        printf(
+            "%s [ %s ] - %s",
+            game->current_words[row - 2]->eng_word,
+            game->current_words[row - 2]->transcription,
+            game->current_words[row - 2]->rus_word
+        );
+        for (int i = 0; i < (int) (M - 2 - 8 - 4 - 30 -
+            u_strlen(game->current_words[row - 2]->eng_word) -
+            u_strlen(game->current_words[row - 2]->transcription) -
+            u_strlen(game->current_words[row - 2]->rus_word));
+            i++
+        ) {
+            printf(" ");
+        }
+    } else {
+        for (int i = 0; i < (int) (M - 30 - 2); i++)
+            printf(" ");
     }
-    game->game_status = 1;
+    printf(" *");
 }
 
 // Printing game's info in terminal
